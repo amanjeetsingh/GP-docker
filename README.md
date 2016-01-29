@@ -11,7 +11,7 @@ This is on Docker Hub here: https://hub.docker.com/r/kevinmtrowbridge/greenplumd
 
 ## Running it
 
-    docker run -i -p 5432:5432 -t greenplumdb_singlenode
+    docker run -i -p 5432:5432 -t kevinmtrowbridge/greenplumdb_singlenode
 
 Proof -- login with psql:
 
