@@ -7,6 +7,12 @@ application.  But it seems to work for testing where you just want something tha
 can execute against.
 
 
+## Running it
+
+    docker run -i -p 5432:5432 -t greenplumdb_singlenode
+    psql -h <docker machine ip / localhost> -p 5432 -U gpadmin template1
+
+
 ## Docker build
 
 Download greenplum-db-appliance-4.3.7.1-build-1-RHEL5-x86_64.bin from Pivotal Network
@@ -24,6 +30,7 @@ I don't deeply understand GPDB but, in my understanding it's a distributed datab
 
 So, it seems like Docker could be useful for this, if you could figure out how to keep the data on persistible volumes ... 
 
-What this is, the "singlenode" mode -- doesn't accomplish any of the heavy parallel data processing stuff, so really, it's only useful for testing, or as starting point to outline the problems it currently has with Docker and what might be involved with getting it to run on Docker in a non "singlenode".
+What this is, the "singlenode" mode -- doesn't accomplish any of the heavy parallel data processing stuff, so really, it's only useful for testing, or as starting point to outline the problems GPDB currently has with Docker and what might be involved with getting GPDB to run on Docker in a non "singlenode" mode.
 
-Please see the Dockerfile for comments regarding the problems I had installing it on Docker.
+Please see the Dockerfile for comments regarding the problems I had installing it on Docker and
+how I hacked around them ...
