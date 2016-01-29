@@ -6,10 +6,15 @@ So, I jammed it into Docker, but this isn't something you'd want to use in a pro
 application.  But it seems to work for testing where you just want something that tests 
 can execute against.
 
+This is on Docker Hub here: https://hub.docker.com/r/kevinmtrowbridge/greenplumdb_singlenode/
+
 
 ## Running it
 
     docker run -i -p 5432:5432 -t greenplumdb_singlenode
+
+Proof -- login with psql:
+
     psql -h <docker machine ip / localhost> -p 5432 -U gpadmin template1
 
 
