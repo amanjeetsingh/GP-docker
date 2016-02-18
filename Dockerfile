@@ -28,33 +28,30 @@ RUN yum update -y &&\
     yum clean all
 
 # CUE GPADMIN USER
-
 RUN groupadd -g 8000 gpadmin &&\
-     useradd -m -s /bin/bash -d /home/gpadmin -g gpadmin -u 8000 gpadmin
+     useradd -m -s /bin/bash -d /home/gpadmin -g gpadmin -u 8000 gpadmin &&\
+     mkdir -p /data/gpmaster /data/gpdata1 /data/gpdata2 &&\
+     chown -R gpadmin:gpadmin /data
 
-# NECESSARY: key exchange with ourselves - needed by single-node greenplum and hadoop
+# NECESSARY: key exchange with ourselves - needed by single-node greenplum
 RUN service sshd start && ssh-keygen -t rsa -q -f /root/.ssh/id_rsa -P "" &&\
-  cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && ssh-keyscan -t rsa localhost >> /root/.ssh/known_hosts &&\
-  ssh-keyscan -t rsa localhost >> /root/.ssh/known_hosts
+  cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys &&\
+  ssh-keyscan -t rsa localhost >> /etc/ssh/ssh_known_hosts
 
-RUN mkdir -p /data/gpmaster /data/gpdata1 /data/gpdata2 &&\
-    chown -R gpadmin:gpadmin /data
 
-# COPY GPDB FILES INTO PLACE
+# Copy greenplum archive and extract it
 COPY greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
-RUN echo "localhost" > hostfile
 RUN service sshd start &&\
     mkdir -p $installPath &&\
     tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
     if [ ! -e `dirname ${installPath}`/greenplum-db ]; then ln -s ./`basename ${installPath}` `dirname ${installPath}`/greenplum-db;fi &&\
     sed -i "s,^GPHOME.*,GPHOME=${installPath}," ${installPath}/greenplum_path.sh &&\
-    rm hostfile greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
+    rm greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 
 ENV GPHOME /usr/local/greenplum-db
 
 WORKDIR /home/gpadmin
 COPY bash/.gpadmin_bash_profile .bash_profile
-
 COPY gpdb/hostlist_singlenode hostlist_singlenode
 COPY gpdb/gpinitsystem_singlenode gpinitsystem_singlenode
 
@@ -100,4 +97,5 @@ EXPOSE 5432
 
 
 CMD ./docker_transient_hostname_workaround.sh && service sshd start &&\
-  su gpadmin -l -c "gpstart -a --verbose" && sleep 86400 # HACK: it's difficult to get Docker to attach to the GPDB process(es) ... so, instead attach to process "sleep for 1 day"
+  su gpadmin -l -c "gpstart -a --verbose" &&\
+  bash
