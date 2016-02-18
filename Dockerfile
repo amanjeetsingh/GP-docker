@@ -20,10 +20,12 @@
 FROM centos:6.6
 MAINTAINER kevinmtrowbridge@gmail.com
 
-RUN yum update -y
-RUN yum install -y ed which tar sed openssh-server openssh-clients
-RUN yum clean all
+ENV archive greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
+ENV installPath /usr/local/greenplum-db-4.3.5.2
 
+RUN yum update -y &&\
+    yum install -y ed which tar sed openssh-server openssh-clients &&\
+    yum clean all
 
 # CENTOS MODIFICATIONS
 
@@ -33,28 +35,32 @@ COPY centos/etc_sysctl.conf /tmp/sysctl.conf
 RUN cat /tmp/sysctl.conf >> /etc/sysctl.conf
 
 COPY centos/etc_security_limits.conf /tmp/limits.conf
-RUN cat /tmp/limits.conf >> /etc/security/limits.conf
-RUN rm /etc/security/limits.d/90-nproc.conf
+RUN cat /tmp/limits.conf >> /etc/security/limits.conf &&\
+    rm /etc/security/limits.d/90-nproc.conf
 
 
 # CUE GPADMIN USER
 
-RUN groupadd -g 8000 gpadmin
-RUN useradd -m -s /bin/bash -d /home/gpadmin -g gpadmin -u 8000 gpadmin
+RUN groupadd -g 8000 gpadmin &&\
+     useradd -m -s /bin/bash -d /home/gpadmin -g gpadmin -u 8000 gpadmin
 
 # NECESSARY: key exchange with ourselves - needed by single-node greenplum and hadoop
 RUN service sshd start && ssh-keygen -t rsa -q -f /root/.ssh/id_rsa -P "" &&\
   cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys && ssh-keyscan -t rsa localhost >> /root/.ssh/known_hosts &&\
   ssh-keyscan -t rsa localhost >> /root/.ssh/known_hosts
 
-RUN mkdir -p /data/gpmaster /data/gpdata1 /data/gpdata2
-RUN chown -R gpadmin:gpadmin /data
+RUN mkdir -p /data/gpmaster /data/gpdata1 /data/gpdata2 &&\
+    chown -R gpadmin:gpadmin /data
 
 # COPY GPDB FILES INTO PLACE
-COPY greenplum-db-appliance-4.3.7.1-build-1-RHEL5-x86_64.bin greenplum-db-appliance-4.3.7.1-build-1-RHEL5-x86_64.bin
+COPY greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 RUN echo "localhost" > hostfile
-RUN service sshd start && /bin/bash greenplum-db-appliance-4.3.7.1-build-1-RHEL5-x86_64.bin &&\
-  rm hostfile greenplum-db-appliance-4.3.7.1-build-1-RHEL5-x86_64.bin
+RUN service sshd start &&\
+    mkdir -p $installPath &&\
+    tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
+    if [ ! -e `dirname ${installPath}`/greenplum-db ]; then ln -s ./`basename ${installPath}` `dirname ${installPath}`/greenplum-db;fi &&\
+    sed -i "s,^GPHOME.*,GPHOME=${installPath}," ${installPath}/greenplum_path.sh &&\
+    rm hostfile greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 
 ENV GPHOME /usr/local/greenplum-db
 
@@ -64,9 +70,9 @@ COPY bash/.gpadmin_bash_profile .bash_profile
 COPY gpdb/hostlist_singlenode hostlist_singlenode
 COPY gpdb/gpinitsystem_singlenode gpinitsystem_singlenode
 
-RUN chown -R gpadmin:gpadmin /home/gpadmin
-
-RUN service sshd start && su gpadmin -l -c "gpssh-exkeys -h localhost"
+RUN chown -R gpadmin:gpadmin /home/gpadmin &&\
+    service sshd start &&\
+    su gpadmin -l -c "gpssh-exkeys -h localhost"
 
 # INITIALIZE GPDB SYSTEM
 # HACK: note, capture of unique docker hostname -- at this point, the hostname gets embedded into the installation ... :(
