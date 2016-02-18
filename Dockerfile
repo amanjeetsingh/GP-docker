@@ -27,18 +27,6 @@ RUN yum update -y &&\
     yum install -y ed which tar sed openssh-server openssh-clients &&\
     yum clean all
 
-# CENTOS MODIFICATIONS
-
-# It's dubious how well the sysctl.conf settings are working ... there's also the option of tuning the kernel
-# at runtime (using docker run -w) ...
-COPY centos/etc_sysctl.conf /tmp/sysctl.conf
-RUN cat /tmp/sysctl.conf >> /etc/sysctl.conf
-
-COPY centos/etc_security_limits.conf /tmp/limits.conf
-RUN cat /tmp/limits.conf >> /etc/security/limits.conf &&\
-    rm /etc/security/limits.d/90-nproc.conf
-
-
 # CUE GPADMIN USER
 
 RUN groupadd -g 8000 gpadmin &&\
