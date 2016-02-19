@@ -1,24 +1,8 @@
-# Greenplum Database (GPDB) "Single Node" Dockerized for testing purposes only.
-
-# NOTES:
-#
-# Most useful GPDB docs I found:
-# http://gpdb.docs.pivotal.io/gs/43/pdf/GPDB43xGettingStarted.pdf
-#
-# Loosely based on "Dockerfile for Greenplum SNE 4.2.6.1": https://gist.github.com/teraflopx/a0af37a880164da87198#comments
-#
-# Useful Docker commands:
-# docker build -t greenplumdb_singlenode .
-# docker run -i -p 5432:5432 -t greenplumdb_singlenode
-# docker ps ... docker exec -it <running container name> bash
-#
-# Test that it's working by accessing it via PSQL:
-# docker-machine ip default
-# psql -h 192.168.99.100 -p 5432 -U gpadmin template1
-#
+# Greenplum Database (GPDB) "Single Node" Docker container
+# Forked from https://github.com/kevinmtrowbridge/greenplumdb_singlenode_docker
 
 FROM centos:6.6
-MAINTAINER kevinmtrowbridge@gmail.com
+MAINTAINER "I&A Team"
 
 ENV archive greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 ENV installPath /usr/local/greenplum-db-4.3.5.2
@@ -39,14 +23,14 @@ RUN service sshd start && ssh-keygen -t rsa -q -f /root/.ssh/id_rsa -P "" &&\
   ssh-keyscan -t rsa localhost >> /etc/ssh/ssh_known_hosts
 
 
-# Copy greenplum archive and extract it
-COPY greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
-RUN service sshd start &&\
+# get the greenplum archive and extract it
+RUN curl -o ${archive} http://copperfiles.auiag.corp/fs/greenplum/${archive} &&\
+    service sshd start &&\
     mkdir -p $installPath &&\
     tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
     if [ ! -e `dirname ${installPath}`/greenplum-db ]; then ln -s ./`basename ${installPath}` `dirname ${installPath}`/greenplum-db;fi &&\
     sed -i "s,^GPHOME.*,GPHOME=${installPath}," ${installPath}/greenplum_path.sh &&\
-    rm greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
+    rm ${archive}
 
 ENV GPHOME /usr/local/greenplum-db
 
