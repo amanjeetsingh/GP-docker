@@ -4,11 +4,12 @@
 FROM centos:6.6
 MAINTAINER "I&A Team"
 
+ENV iag_proxy http://10.139.234.210:8080
 ENV archive greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 ENV installPath /usr/local/greenplum-db-4.3.5.2
 
-RUN yum update -y &&\
-    yum install -y ed which tar sed openssh-server openssh-clients &&\
+RUN http_proxy=$iag_proxy https_proxy=$iag_proxy yum update -y &&\
+    http_proxy=$iag_proxy https_proxy=$iag_proxy yum install -y ed which tar sed openssh-server openssh-clients &&\
     yum clean all
 
 # CUE GPADMIN USER
