@@ -82,5 +82,4 @@ EXPOSE 5432
 
 
 CMD ./docker_transient_hostname_workaround.sh && service sshd start &&\
-  su gpadmin -l -c "gpstart -a --verbose" &&\
-  bash
+    su gpadmin -l -c "gpstart -a --verbose" && sleep 86400 # HACK: it's difficult to get Docker to attach to the GPDB process(es) ... so, instead attach to process "sleep for 1 day"
