@@ -48,6 +48,7 @@ RUN chown -R gpadmin:gpadmin /home/gpadmin &&\
 # HACK: note, capture of unique docker hostname -- at this point, the hostname gets embedded into the installation ... :(
 RUN service sshd start &&\
  hostname > /docker_hostname_at_moment_of_gpinitsystem &&\
+ sysctl -w kernel.shmmax=175779584 &&\
  su gpadmin -l -c "gpinitsystem -a -D -c /home/gpadmin/gpinitsystem_singlenode;"; exit 0;
 
 
