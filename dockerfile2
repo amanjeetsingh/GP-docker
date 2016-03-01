@@ -1,0 +1,34 @@
+FROM dockerfile1
+
+# HACK: docker_transient_hostname_workaround, explanation:
+#
+# When gpinitsystem runs, it embeds the hostname (at that moment) into the installation.  Since Docker generates a new
+# random hostname each time it runs, the hostname that is embedded, will never work again.  When you run `gpstart`, if
+# the embedded hostname is not a valid DNS name, it will fail with this error:
+#
+# gpadmin-[ERROR]:-gpstart failed.  exiting...
+# <snip>
+#    addrinfo = socket.getaddrinfo(hostToPing, None)
+# gaierror: [Errno -2] Name or service not known
+#
+# (You can reproduce this by removing the `docker_transient_hostname_workaround` bit from the CMD at the bottom.)
+#
+# So what we do here is to capture the random hostname at the moment that gpinitsystem is run, and later we can append
+# it to /etc/hosts when we run `gpstart` -- this seems to keep it happy.
+#
+COPY bash/docker_transient_hostname_workaround.sh docker_transient_hostname_workaround.sh
+RUN chmod +x docker_transient_hostname_workaround.sh
+
+
+# WIDE OPEN GPDB ACCESS PERMISSIONS
+COPY gpdb/allow_all_incoming_pg_hba.conf /data/gpmaster/gpsne-1/pg_hba.conf
+COPY gpdb/postgresql.conf /data/gpmaster/gpsne-1/postgresql.conf
+
+EXPOSE 5432
+
+# THIS DOCKER IMAGE WILL BE USED FOR TESTING SO WE DON'T CARE ABOUT THE DATA, AT ALL
+# VOLUME ["/data"]
+
+
+CMD ./docker_transient_hostname_workaround.sh && service sshd start &&\
+    su gpadmin -l -c "gpstart -a --verbose" && sleep 86400 # HACK: it's difficult to get Docker to attach to the GPDB process(es) ... so, instead attach to process "sleep for 1 day"
