@@ -9,7 +9,7 @@ ENV archive greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 ENV installPath /usr/local/greenplum-db-4.3.5.2
 
 RUN http_proxy=$iag_proxy https_proxy=$iag_proxy yum update -y &&\
-    http_proxy=$iag_proxy https_proxy=$iag_proxy yum install -y ed which tar sed openssh-server openssh-clients &&\
+    http_proxy=$iag_proxy https_proxy=$iag_proxy yum install -y ed which tar sed openssh-server openssh-clients perl &&\
     yum clean all
 
 # CUE GPADMIN USER
