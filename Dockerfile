@@ -31,6 +31,7 @@ RUN curl -o ${archive} http://copperfiles.auiag.corp/fs/greenplum/${archive} &&\
     tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
     if [ ! -e `dirname ${installPath}`/greenplum-db ]; then ln -s ./`basename ${installPath}` `dirname ${installPath}`/greenplum-db;fi &&\
     sed -i "s,^GPHOME.*,GPHOME=${installPath}," ${installPath}/greenplum_path.sh &&\
+    chown gpadmin.gpadmin ${installPath} &&\
     rm ${archive}
 
 ENV GPHOME /usr/local/greenplum-db
@@ -70,6 +71,13 @@ RUN service sshd start &&\
 COPY bash/docker_transient_hostname_workaround.sh docker_transient_hostname_workaround.sh
 RUN chmod +x docker_transient_hostname_workaround.sh
 
+# install postgis extension
+COPY postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg /tmp/
+RUN ./docker_transient_hostname_workaround.sh && service sshd start &&\
+    su gpadmin -l -c "gpstart -a --verbose" &&\
+    sleep 120 &&\
+    su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" &&\
+    rm -f /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg
 
 # WIDE OPEN GPDB ACCESS PERMISSIONS
 COPY gpdb/allow_all_incoming_pg_hba.conf /data/gpmaster/gpsne-1/pg_hba.conf

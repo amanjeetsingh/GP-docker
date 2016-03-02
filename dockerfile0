@@ -30,15 +30,14 @@ RUN curl -o ${archive} http://copperfiles.auiag.corp/fs/greenplum/${archive} &&\
     tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
     if [ ! -e `dirname ${installPath}`/greenplum-db ]; then ln -s ./`basename ${installPath}` `dirname ${installPath}`/greenplum-db;fi &&\
     sed -i "s,^GPHOME.*,GPHOME=${installPath}," ${installPath}/greenplum_path.sh &&\
+    chown gpadmin.gpadmin ${installPath} &&\
     rm ${archive}
 
 ENV GPHOME /usr/local/greenplum-db
 
 WORKDIR /home/gpadmin
+COPY bash/gpinit.sh /gpinit.sh
 COPY bash/.gpadmin_bash_profile .bash_profile
 COPY gpdb/hostlist_singlenode hostlist_singlenode
 COPY gpdb/gpinitsystem_singlenode gpinitsystem_singlenode
 
-RUN chown -R gpadmin:gpadmin /home/gpadmin &&\
-    service sshd start &&\
-    su gpadmin -l -c "gpssh-exkeys -h localhost"
