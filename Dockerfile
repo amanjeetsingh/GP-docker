@@ -73,13 +73,16 @@ RUN service sshd start &&\
 COPY bash/docker_transient_hostname_workaround.sh docker_transient_hostname_workaround.sh
 RUN chmod +x docker_transient_hostname_workaround.sh
 
-# install postgis extension
-COPY postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg /tmp/
+# install extensions
 RUN ./docker_transient_hostname_workaround.sh && service sshd start &&\
     su gpadmin -l -c "gpstart -a --verbose" &&\
     sleep 120 &&\
+    curl -o /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg &&\
     su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" &&\
-    rm -f /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg
+    rm -f /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg &&\
+    curl -o /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg &&\
+    su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" &&\
+    rm -f /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg
 
 # WIDE OPEN GPDB ACCESS PERMISSIONS
 COPY gpdb/allow_all_incoming_pg_hba.conf /data/gpmaster/gpsne-1/pg_hba.conf

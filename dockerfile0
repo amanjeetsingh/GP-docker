@@ -42,4 +42,3 @@ COPY bash/gpinit.sh /gpinit.sh
 COPY bash/.gpadmin_bash_profile .bash_profile
 COPY gpdb/hostlist_singlenode hostlist_singlenode
 COPY gpdb/gpinitsystem_singlenode gpinitsystem_singlenode
-
