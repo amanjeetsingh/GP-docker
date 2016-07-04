@@ -31,11 +31,5 @@ Then:
 
 ## Discussion
 
-I don't deeply understand GPDB but, in my understanding it's a distributed database (think Hadoop) which would involve a "cluster" of servers ... you submit a super heavy Postgres query to a master instance, which then sends it out to hundreds or thousands of child nodes, which run queries in parallel and then send the results back to the master.
-
-So, it seems like Docker could be useful for this, if you could figure out how to keep the data on persistible volumes ... 
-
-What this is, the "singlenode" mode -- doesn't accomplish any of the heavy parallel data processing stuff, so really, it's only useful for testing, or as starting point to outline the problems GPDB currently has with Docker and what might be involved with getting GPDB to run on Docker in a non "singlenode" mode.
-
 Please see the Dockerfile for comments regarding the problems I had installing it on Docker and
 how I hacked around them ...

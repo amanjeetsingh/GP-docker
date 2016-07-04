@@ -12,11 +12,11 @@ cat /proc/sys/kernel/shmmax >>/tmp/sysctl.log 2>&1
 # initialise gp
 su gpadmin -l -c "gpinitsystem -a -D -c /home/gpadmin/gpinitsystem_singlenode;exit 0" >/tmp/gpinit.log 2>&1
 # download and install postgis
-curl -o /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg >>/tmp/curl.log 2>&1
+curl -o /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg http://xxxx_xxxx/fs/greenplum/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg >>/tmp/curl.log 2>&1
 su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" >/tmp/postgis_install.log 2>&1
 rm -f /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg
 # install pgcrypt
-curl -o /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg >>/tmp/curl.log 2>&1
+curl -o /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg http://xxxx_xxxx/fs/greenplum/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg >>/tmp/curl.log 2>&1
 su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" >/tmp/pgcrypto_install.log 2>&1
 rm -f /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg
 # cleanly stop

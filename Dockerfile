@@ -2,14 +2,14 @@
 # Forked from https://github.com/kevinmtrowbridge/greenplumdb_singlenode_docker
 
 FROM centos:6.6
-MAINTAINER "I&A Team"
+MAINTAINER "A-Team"
 
-ENV iag_proxy http://10.139.234.210:8080
+ENV org_name_proxy http://10.139.234.210:8080
 ENV archive greenplum-db-4.3.5.2-build-1-RHEL5-x86_64.bin
 ENV installPath /usr/local/greenplum-db-4.3.5.2
 
-RUN http_proxy=$iag_proxy https_proxy=$iag_proxy yum update -y &&\
-    http_proxy=$iag_proxy https_proxy=$iag_proxy yum install -y ed which tar sed openssh-server openssh-clients perl &&\
+RUN http_proxy=$org_name_proxy https_proxy=$org_name_proxy yum update -y &&\
+    http_proxy=$org_name_proxy https_proxy=$org_name_proxy yum install -y ed which tar sed openssh-server openssh-clients perl &&\
     yum clean all &&\
     echo '/usr/lib64/perl5/CORE/' > /etc/ld.so.conf.d/perl.conf &&\
     ldconfig
@@ -27,7 +27,7 @@ RUN service sshd start && ssh-keygen -t rsa -q -f /root/.ssh/id_rsa -P "" &&\
 
 
 # get the greenplum archive and extract it
-RUN curl -o ${archive} http://copperfiles.auiag.corp/fs/greenplum/${archive} &&\
+RUN curl -o ${archive} http://xxxx_xxxx.auorg_name.corp/fs/greenplum/${archive} &&\
     service sshd start &&\
     mkdir -p $installPath &&\
     tail -n +`awk '/^__END_HEADER__/ {print NR + 1; exit 0; }' "${archive}"` "${archive}" | tar zxf - -C ${installPath} &&\
@@ -77,10 +77,10 @@ RUN chmod +x docker_transient_hostname_workaround.sh
 RUN ./docker_transient_hostname_workaround.sh && service sshd start &&\
     su gpadmin -l -c "gpstart -a --verbose" &&\
     sleep 120 &&\
-    curl -o /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg &&\
+    curl -o /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg http://xxxx_xxxx/fs/greenplum/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg &&\
     su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" &&\
     rm -f /tmp/postgis-ossv2.0.3_pv2.0.1_gpdb4.3orca-rhel5-x86_64.gppkg &&\
-    curl -o /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg http://copperfiles/fs/greenplum/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg &&\
+    curl -o /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg http://xxxx_xxxx/fs/greenplum/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg &&\
     su gpadmin -l -c "/usr/local/greenplum-db/bin/gppkg --install /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg; exit 0" &&\
     rm -f /tmp/pgcrypto-ossv1.1_pv1.2_gpdb4.3orca-rhel5-x86_64.gppkg
 
